@@ -88,39 +88,48 @@ export const handler = async (): Promise<HandlerResult> => {
   const RAIN_THRESHOLD_MM = Number(process.env.RAIN_THRESHOLD_MM ?? '0')
 
   let shouldAlert = false
-  let wind = 0
-  let gust = 0
-  let rain = 0
-  let time = ''
+  let maxWind = 0
+  let maxGust = 0
+  let maxRain = 0
+  let windTime = ''
+  let gustTime = ''
+  let rainTime = ''
 
   for (const h of hours) {
+    if (h.wind_kph > maxWind) {
+      maxWind = h.wind_kph
+      windTime = h.time
+    }
+    if (h.gust_kph > maxGust) {
+      maxGust = h.gust_kph
+      gustTime = h.time
+    }
+    if (h.precip_mm > maxRain) {
+      maxRain = h.precip_mm
+      rainTime = h.time
+    }
+
     if (
       h.wind_kph >= WIND_THRESHOLD_KPH ||
       h.gust_kph >= GUST_THRESHOLD_KPH ||
       h.precip_mm >= RAIN_THRESHOLD_MM
     ) {
       shouldAlert = true
-      wind = h.wind_kph
-      gust = h.gust_kph
-      rain = h.precip_mm
-      time = h.time
-      break
     }
   }
 
   if (shouldAlert) {
     const alerts: string[] = []
-    if (wind >= WIND_THRESHOLD_KPH) alerts.push(`💨 Vento: ${wind} km/h.`)
-    if (gust >= GUST_THRESHOLD_KPH) alerts.push(`🌪️ Raffiche: ${gust} km/h.`)
-    if (rain >= RAIN_THRESHOLD_MM) alerts.push(`🌧️ Pioggia: ${rain} mm.`)
+    if (maxWind >= WIND_THRESHOLD_KPH) alerts.push(`💨 Vento fino a ${maxWind} km/h alle (${windTime}).`)
+    if (maxGust >= GUST_THRESHOLD_KPH) alerts.push(`🌪️ Raffiche fino a ${maxGust} km/h alle (${gustTime}).`)
+    if (maxRain >= RAIN_THRESHOLD_MM) alerts.push(`🌧️ Pioggia fino a ${maxRain} mm alle (${rainTime}).`)
 
     const message =
       `⚠️ Allerta meteo nelle prossime 24 ore in ${location}.\n\n` +
-      alerts.join('\n') +
-      `\n🕒 Orario: ${time}.`
+      alerts.join('\n')
 
     await sendTelegramMessage(botToken, chatId, message)
   }
 
-  return { should_alert: shouldAlert, wind_kmh: wind, gust_kmh: gust, rain_mm: rain, time }
+  return { should_alert: shouldAlert, wind_kmh: maxWind, gust_kmh: maxGust, rain_mm: maxRain, time: windTime }
 }
