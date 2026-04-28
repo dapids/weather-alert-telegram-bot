@@ -14,6 +14,7 @@ interface ForecastHour {
   time: string
   wind_kph: number
   gust_kph: number
+  precip_mm: number
 }
 
 interface WeatherApiResponse {
@@ -65,6 +66,7 @@ interface HandlerResult {
   should_alert: boolean
   wind_kmh: number
   gust_kmh: number
+  rain_mm: number
   time: string
 }
 
@@ -83,31 +85,42 @@ export const handler = async (): Promise<HandlerResult> => {
 
   const WIND_THRESHOLD_KPH = Number(process.env.WIND_THRESHOLD_KPH ?? '10')
   const GUST_THRESHOLD_KPH = Number(process.env.GUST_THRESHOLD_KPH ?? '20')
+  const RAIN_THRESHOLD_MM = Number(process.env.RAIN_THRESHOLD_MM ?? '0')
 
   let shouldAlert = false
   let wind = 0
   let gust = 0
+  let rain = 0
   let time = ''
 
   for (const h of hours) {
-    if (h.wind_kph >= WIND_THRESHOLD_KPH || h.gust_kph >= GUST_THRESHOLD_KPH) {
+    if (
+      h.wind_kph >= WIND_THRESHOLD_KPH ||
+      h.gust_kph >= GUST_THRESHOLD_KPH ||
+      h.precip_mm >= RAIN_THRESHOLD_MM
+    ) {
       shouldAlert = true
       wind = h.wind_kph
       gust = h.gust_kph
+      rain = h.precip_mm
       time = h.time
       break
     }
   }
 
   if (shouldAlert) {
+    const alerts: string[] = []
+    if (wind >= WIND_THRESHOLD_KPH) alerts.push(`💨 Vento: ${wind} km/h.`)
+    if (gust >= GUST_THRESHOLD_KPH) alerts.push(`🌪️ Raffiche: ${gust} km/h.`)
+    if (rain >= RAIN_THRESHOLD_MM) alerts.push(`🌧️ Pioggia: ${rain} mm.`)
+
     const message =
-      `🌬️ Allerta vento nelle prossime 24 ore in ${location}.\n\n` +
-      `💨 Vento: ${wind} km/h.\n` +
-      `🌪️ Raffiche: ${gust} km/h.\n` +
-      `🕒 Orario: ${time}.`
+      `⚠️ Allerta meteo nelle prossime 24 ore in ${location}.\n\n` +
+      alerts.join('\n') +
+      `\n🕒 Orario: ${time}.`
 
     await sendTelegramMessage(botToken, chatId, message)
   }
 
-  return { should_alert: shouldAlert, wind_kmh: wind, gust_kmh: gust, time }
+  return { should_alert: shouldAlert, wind_kmh: wind, gust_kmh: gust, rain_mm: rain, time }
 }

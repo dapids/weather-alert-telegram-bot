@@ -22,6 +22,7 @@ env:
   SCHEDULE_HOUR_UTC: ${{ vars.SCHEDULE_HOUR_UTC || '17' }}
   WIND_THRESHOLD_KPH: ${{ vars.WIND_THRESHOLD_KPH || '10' }}
   GUST_THRESHOLD_KPH: ${{ vars.GUST_THRESHOLD_KPH || '20' }}
+  RAIN_THRESHOLD_MM: ${{ vars.RAIN_THRESHOLD_MM || '10' }}
   LATITUDE: ${{ secrets.LATITUDE || vars.LATITUDE || '48.8566' }}
   LONGITUDE: ${{ secrets.LONGITUDE || vars.LONGITUDE || '2.3522' }}
   LOCATION_LABEL: ${{ secrets.LOCATION_LABEL || vars.LOCATION_LABEL || 'Paris, France' }}
@@ -54,7 +55,7 @@ jobs:
         run: yarn format:check
 
       - name: CDK Synth
-        run: yarn cdk synth -c scheduleHourUtc=${{ env.SCHEDULE_HOUR_UTC }} -c windThresholdKph=${{ env.WIND_THRESHOLD_KPH }} -c gustThresholdKph=${{ env.GUST_THRESHOLD_KPH }} -c latitude="${{ env.LATITUDE }}" -c longitude="${{ env.LONGITUDE }}" -c locationLabel="${{ env.LOCATION_LABEL }}"
+        run: yarn cdk synth -c scheduleHourUtc=${{ env.SCHEDULE_HOUR_UTC }} -c windThresholdKph=${{ env.WIND_THRESHOLD_KPH }} -c gustThresholdKph=${{ env.GUST_THRESHOLD_KPH }} -c rainThresholdMm=${{ env.RAIN_THRESHOLD_MM }} -c latitude="${{ env.LATITUDE }}" -c longitude="${{ env.LONGITUDE }}" -c locationLabel="${{ env.LOCATION_LABEL }}"
 
   deploy:
     name: Deploy to AWS
@@ -86,4 +87,4 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: CDK Deploy
-        run: yarn cdk deploy --require-approval never -c scheduleHourUtc=${{ env.SCHEDULE_HOUR_UTC }} -c windThresholdKph=${{ env.WIND_THRESHOLD_KPH }} -c gustThresholdKph=${{ env.GUST_THRESHOLD_KPH }} -c latitude="${{ env.LATITUDE }}" -c longitude="${{ env.LONGITUDE }}" -c locationLabel="${{ env.LOCATION_LABEL }}"
+        run: yarn cdk deploy --require-approval never -c scheduleHourUtc=${{ env.SCHEDULE_HOUR_UTC }} -c windThresholdKph=${{ env.WIND_THRESHOLD_KPH }} -c gustThresholdKph=${{ env.GUST_THRESHOLD_KPH }} -c rainThresholdMm=${{ env.RAIN_THRESHOLD_MM }} -c latitude="${{ env.LATITUDE }}" -c longitude="${{ env.LONGITUDE }}" -c locationLabel="${{ env.LOCATION_LABEL }}"

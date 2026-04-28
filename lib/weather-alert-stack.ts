@@ -42,6 +42,8 @@ export class WeatherAlertStack extends cdk.Stack {
       (this.node.tryGetContext('windThresholdKph') as string | undefined) ?? '10'
     const gustThresholdKph: string =
       (this.node.tryGetContext('gustThresholdKph') as string | undefined) ?? '20'
+    const rainThresholdMm: string =
+      (this.node.tryGetContext('rainThresholdMm') as string | undefined) ?? '0'
 
     const weatherAlertFn = new lambdaNodejs.NodejsFunction(this, 'WeatherAlertFunction', {
       entry: path.join(__dirname, '../lambda/index.ts'),
@@ -62,6 +64,7 @@ export class WeatherAlertStack extends cdk.Stack {
         LOCATION_LABEL: locationLabel,
         WIND_THRESHOLD_KPH: windThresholdKph,
         GUST_THRESHOLD_KPH: gustThresholdKph,
+        RAIN_THRESHOLD_MM: rainThresholdMm,
       },
     })
 
