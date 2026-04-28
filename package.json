@@ -1,5 +1,5 @@
 {
-  "name": "wind-alert-telegram-bot",
+  "name": "weather-alert-telegram-bot",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,8 +11,8 @@
     "lint": "eslint .",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "invocations": "AWS_PAGER='' aws cloudwatch get-metric-statistics --namespace AWS/Lambda --metric-name Invocations --dimensions Name=FunctionName,Value=$(aws lambda list-functions --query 'Functions[?contains(FunctionName, `WindAlertStack-WindAlertFunction`)&&!contains(FunctionName, `LogRetention`)].FunctionName' --output text) --start-time $(date -u -v-7d +%Y-%m-%dT%H:%M:%SZ) --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) --period 3600 --statistics Sum --query 'sort_by(Datapoints, &Timestamp)[*].{Time:Timestamp,Count:Sum}'",
-    "errors": "AWS_PAGER='' aws logs filter-log-events --log-group-name /aws/lambda/$(aws lambda list-functions --query 'Functions[?contains(FunctionName, `WindAlertStack-WindAlertFunction`)&&!contains(FunctionName, `LogRetention`)].FunctionName' --output text) --start-time $(($(date +%s) - 604800))000 --filter-pattern '?ERROR ?Error ?error' --query 'events[*].message' --output text"
+    "invocations": "chmod +x ./scripts/invocations.sh && ./scripts/invocations.sh",
+    "errors": "chmod +x ./scripts/errors.sh && ./scripts/errors.sh"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.188.0",

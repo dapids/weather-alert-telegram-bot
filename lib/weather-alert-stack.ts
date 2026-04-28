@@ -16,23 +16,23 @@ function getRequiredContext(scope: Construct, key: string): string {
   return value
 }
 
-export class WindAlertStack extends cdk.Stack {
+export class WeatherAlertStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
     // SSM SecureString parameter names — create these before deploying:
-    //   aws ssm put-parameter --name /wind-alert/weatherapi-key --value "<KEY>" --type SecureString
-    //   aws ssm put-parameter --name /wind-alert/telegram-bot-token --value "<TOKEN>" --type SecureString
-    //   aws ssm put-parameter --name /wind-alert/telegram-chat-id --value "<CHAT_ID>" --type SecureString
+    //   aws ssm put-parameter --name /weather-alert/weatherapi-key --value "<KEY>" --type SecureString
+    //   aws ssm put-parameter --name /weather-alert/telegram-bot-token --value "<TOKEN>" --type SecureString
+    //   aws ssm put-parameter --name /weather-alert/telegram-chat-id --value "<CHAT_ID>" --type SecureString
     const weatherApiKeyParameterName: string =
       (this.node.tryGetContext('weatherApiKeyParameterName') as string | undefined) ??
-      '/wind-alert/weatherapi-key'
+      '/weather-alert/weatherapi-key'
     const botTokenParameterName: string =
       (this.node.tryGetContext('botTokenParameterName') as string | undefined) ??
-      '/wind-alert/telegram-bot-token'
+      '/weather-alert/telegram-bot-token'
     const chatIdParameterName: string =
       (this.node.tryGetContext('chatIdParameterName') as string | undefined) ??
-      '/wind-alert/telegram-chat-id'
+      '/weather-alert/telegram-chat-id'
     const latitude = getRequiredContext(this, 'latitude')
     const longitude = getRequiredContext(this, 'longitude')
     const locationLabel = getRequiredContext(this, 'locationLabel')
@@ -43,7 +43,7 @@ export class WindAlertStack extends cdk.Stack {
     const gustThresholdKph: string =
       (this.node.tryGetContext('gustThresholdKph') as string | undefined) ?? '20'
 
-    const windAlertFn = new lambdaNodejs.NodejsFunction(this, 'WindAlertFunction', {
+    const weatherAlertFn = new lambdaNodejs.NodejsFunction(this, 'WeatherAlertFunction', {
       entry: path.join(__dirname, '../lambda/index.ts'),
       handler: 'handler',
       runtime: lambda.Runtime.NODEJS_22_X,
@@ -65,7 +65,7 @@ export class WindAlertStack extends cdk.Stack {
       },
     })
 
-    windAlertFn.addToRolePolicy(
+    weatherAlertFn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ssm:GetParameter'],
         resources: [
@@ -79,8 +79,8 @@ export class WindAlertStack extends cdk.Stack {
     // EventBridge rule — runs once per day at configured UTC hour
     new events.Rule(this, 'DailySchedule', {
       schedule: events.Schedule.cron({ minute: '0', hour: scheduleHourUtc }),
-      description: `Triggers wind-alert Lambda daily at ${scheduleHourUtc}:00 UTC`,
-      targets: [new targets.LambdaFunction(windAlertFn)],
+      description: `Triggers weather-alert Lambda daily at ${scheduleHourUtc}:00 UTC`,
+      targets: [new targets.LambdaFunction(weatherAlertFn)],
     })
   }
 }

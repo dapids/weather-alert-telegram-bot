@@ -1,5 +1,5 @@
 {
-  "app": "yarn ts-node --prefer-ts-exts bin/wind-alert.ts",
+  "app": "yarn ts-node --prefer-ts-exts bin/weather-alert.ts",
   "watch": {
     "include": ["**"],
     "exclude": [
@@ -31,8 +31,8 @@
     "@aws-cdk/aws-events:eventsTargetQueueSameAccount": true,
     "@aws-cdk/aws-lambda:useLatestRuntimeVersion": true,
 
-    "weatherApiKeyParameterName": "/wind-alert/weatherapi-key",
-    "botTokenParameterName": "/wind-alert/telegram-bot-token",
-    "chatIdParameterName": "/wind-alert/telegram-chat-id"
+    "weatherApiKeyParameterName": "/weather-alert/weatherapi-key",
+    "botTokenParameterName": "/weather-alert/telegram-bot-token",
+    "chatIdParameterName": "/weather-alert/telegram-chat-id"
   }
 }
